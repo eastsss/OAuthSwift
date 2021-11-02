@@ -15,12 +15,12 @@ import Foundation
 open class ASWebAuthenticationURLHandler: OAuthSwiftURLHandlerType {
     var webAuthSession: ASWebAuthenticationSession!
     let prefersEphemeralWebBrowserSession: Bool
-    let callbackUrlScheme: String
+    let callbackUrl: String
 
     weak var presentationContextProvider: ASWebAuthenticationPresentationContextProviding?
 
-    public init(callbackUrlScheme: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding?, prefersEphemeralWebBrowserSession: Bool = false) {
-        self.callbackUrlScheme = callbackUrlScheme
+    public init(callbackUrl: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding?, prefersEphemeralWebBrowserSession: Bool = false) {
+        self.callbackUrl = callbackUrl
         self.presentationContextProvider = presentationContextProvider
         self.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
     }
@@ -28,13 +28,13 @@ open class ASWebAuthenticationURLHandler: OAuthSwiftURLHandlerType {
     public func handle(_ url: URL) {
         webAuthSession = ASWebAuthenticationSession(
             url: url,
-            callbackURLScheme: callbackUrlScheme,
+            callbackURLScheme: callbackUrl.url?.scheme,
             completionHandler: { callback, error in
                 if let error = error {
                     let msg = error.localizedDescription.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
                     let errorDomain = (error as NSError).domain
                     let errorCode = (error as NSError).code
-                    let urlString = "\(self.callbackUrlScheme):?error=\(msg ?? "UNKNOWN")&error_domain=\(errorDomain)&error_code=\(errorCode)"
+                    let urlString = "\(self.callbackUrl)?error=\(msg ?? "UNKNOWN")&error_domain=\(errorDomain)&error_code=\(errorCode)"
                     let url = URL(string: urlString)!
                     #if !OAUTH_APP_EXTENSIONS
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
