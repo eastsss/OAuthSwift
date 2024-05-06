@@ -36,6 +36,7 @@ open class OAuth2Swift: OAuthSwift {
     var customKeypath: String?
     /// if exists, will be send into the 'refresh-token' request
     var customAccessTokenParams: Dictionary<String,String>? = nil
+    var sendSecretToAccessTokenUrl = true
 
     // MARK: init
     public init(consumerKey: String, consumerSecret: String, authorizeUrl: URLConvertible, accessTokenUrl: URLConvertible? = nil, responseType: String, contentType: String? = nil, customKeypath: String? = nil, customAccessTokenParams: Dictionary<String,String>? = nil) {
@@ -228,13 +229,10 @@ open class OAuth2Swift: OAuthSwift {
         // PKCE - extra parameter
         if let codeVerifier = self.codeVerifier {
             parameters["code_verifier"] = codeVerifier
-            // Don't send client secret when using PKCE, some services complain
-        } else {
-            // client secrets should only be used for web style apps where they can't be decompiled (use pkce instead), so if it's empty, don't post it as some servers will reject it
-            // https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/
-            if !self.consumerSecret.isEmpty {
-                parameters["client_secret"] = self.consumerSecret
-            }
+        }
+        
+        if !self.consumerSecret.isEmpty && sendSecretToAccessTokenUrl {
+            parameters["client_secret"] = self.consumerSecret
         }
 
         if let callbackURL = callbackURL {
