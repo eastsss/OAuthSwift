@@ -8,7 +8,7 @@
 
 import Foundation
 
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(watchOS)
 import WatchKit
@@ -22,18 +22,22 @@ open class OAuthSwiftOpenURLExternally: OAuthSwiftURLHandlerType {
     public static var sharedInstance: OAuthSwiftOpenURLExternally = OAuthSwiftOpenURLExternally()
 
     @objc open func handle(_ url: URL) {
-        #if os(iOS) || os(tvOS)
-        #if !OAUTH_APP_EXTENSIONS
-        if #available(iOS 10.0, tvOS 10.0, *) {
+        DispatchQueue.main.async {
+            #if os(iOS) || os(tvOS)
+            #if !OAUTH_APP_EXTENSIONS
+            if #available(iOS 10.0, tvOS 10.0, *) {
+                UIApplication.shared.open(url)
+            } else {
+                UIApplication.shared.openURL(url)
+            }
+            #endif
+            #elseif os(watchOS)
+            // WATCHOS: not implemented
+            #elseif os(OSX)
+            NSWorkspace.shared.open(url)
+            #elseif os(visionOS)
             UIApplication.shared.open(url)
-        } else {
-            UIApplication.shared.openURL(url)
+            #endif
         }
-        #endif
-        #elseif os(watchOS)
-        // WATCHOS: not implemented
-        #elseif os(OSX)
-        NSWorkspace.shared.open(url)
-        #endif
     }
 }

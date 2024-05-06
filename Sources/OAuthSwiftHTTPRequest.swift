@@ -7,7 +7,7 @@
 //
 
 import Foundation
-#if os(iOS)
+#if os(iOS) || os(visionOS)
 #if !OAUTH_APP_EXTENSIONS
 import UIKit
 #endif
@@ -102,27 +102,11 @@ open class OAuthSwiftHTTPRequest: NSObject, OAuthSwiftRequestHandle {
 
             self.task?.resume()
             self.session.finishTasksAndInvalidate()
-
-            #if os(iOS)
-                #if !OAUTH_APP_EXTENSIONS
-                #if !targetEnvironment(macCatalyst)
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = self.config.sessionFactory.isNetworkActivityIndicatorVisible
-                    #endif
-                #endif
-            #endif
         }
     }
 
     /// Function called when receiving data from server.
     public static func completionHandler(completionHandler completion: CompletionHandler?, request: URLRequest, data: Data?, resp: URLResponse?, error: Error?) {
-        #if os(iOS)
-        #if !OAUTH_APP_EXTENSIONS
-        #if !targetEnvironment(macCatalyst)
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        #endif
-        #endif
-        #endif
-
         // MARK: failure error returned by server
         if let error = error {
             var oauthError: OAuthSwiftError = .requestError(error: error, request: request)
